@@ -14,8 +14,8 @@ var User, rootUserId, secondId, relId, userData, eventSpy, uniqueName;
 describe("model", function(){
   // this.timeout(0);
 
-  // before(testDatabase.refreshDb);
-  // after(testDatabase.stopDb);
+  before(testDatabase.refreshDb);
+  after(testDatabase.stopDb);
   it("should create a new model with no schema", function(done){
 
     var Mod = Model.model('model');
@@ -61,12 +61,12 @@ describe("model", function(){
       User.schema.on('create', eventSpy);
       User.create(user, function(err, results){
         should.not.exist(err);
-        should.exist(results.id);
-        rootUserId = results.id;
-        should.exist(results.node);
-        results.node.first_name.should.equal('Rory');
-        results.node.last_name.should.equal('madden');
-        results.node.email.should.equal('rorymadden@gmail.com');
+        should.exist(results._id);
+        rootUserId = results._id;
+        should.exist(results);
+        results.first_name.should.equal('Rory');
+        results.last_name.should.equal('madden');
+        results.email.should.equal('rorymadden@gmail.com');
         should.not.exist(results.rel);
         assert(eventSpy.called, 'Event did not fire.');
         assert(eventSpy.calledOnce, 'Event fired more than once');
@@ -82,11 +82,11 @@ describe("model", function(){
       User.schema.on('update',eventSpy);
       User.findByIdAndUpdate(rootUserId, updates, function(err, results){
         should.not.exist(err);
-        results.id.should.equal(rootUserId);
-        should.exist(results.node);
-        results.node.first_name.should.equal('Roger');
-        results.node.last_name.should.equal('madden');
-        results.node.email.should.equal('rorymadden@gmail.com');
+        results._id.should.equal(rootUserId);
+        should.exist(results);
+        results.first_name.should.equal('Roger');
+        results.last_name.should.equal('madden');
+        results.email.should.equal('rorymadden@gmail.com');
         should.not.exist(results.rel);
         assert(eventSpy.called, 'Event did not fire.');
         assert(eventSpy.calledOnce, 'Event fired more than once');
@@ -105,12 +105,12 @@ describe("model", function(){
         should.not.exist(err);
         User.findOneAndUpdate({first_name: time}, updates, function(err, results){
           should.not.exist(err);
-          results.id.should.equal(rootUserId);
+          results._id.should.equal(rootUserId);
           should.not.exist(err);
-          should.exist(results.node);
-          results.node.first_name.should.equal('Mary');
-          results.node.last_name.should.equal('madden');
-          results.node.email.should.equal('rorymadden@gmail.com');
+          should.exist(results);
+          results.first_name.should.equal('Mary');
+          results.last_name.should.equal('madden');
+          results.email.should.equal('rorymadden@gmail.com');
           should.not.exist(results.rel);
           assert(eventSpy.called, 'Event did not fire.');
           assert(eventSpy.calledTwice, 'Event should have fired twice');
@@ -136,9 +136,9 @@ describe("model", function(){
       User.schema.on('create',eventSpy);
       User.create(user, {relationship: relationship}, function(err, results){
         should.not.exist(err);
-        should.exist(results.id);
-        secondId = results.id;
         should.exist(results.node);
+        should.exist(results.node._id);
+        secondId = results.node._id;
         results.node.first_name.should.equal('Cath');
         results.node.last_name.should.equal('fee');
         results.node.email.should.equal('other@gmail.com');
@@ -161,8 +161,8 @@ describe("model", function(){
       };
       User.createRelationship(relationship, function(err, rel){
         should.not.exist(err);
-        rel.id.should.be.a('number');
-        relId = rel.id;
+        rel._id.should.be.a('number');
+        relId = rel._id;
         rel.type.should.equal('FRIEND');
         rel.rel.since.should.equal('forever');
         done();
@@ -239,9 +239,9 @@ describe("model", function(){
           trans.commit(function(err2, response){
             should.not.exist(err);
             should.not.exist(err2);
-            result.id.should.be.a('number');
-            rootUserId = result.id;
-            result.node.first_name.should.equal('Rory');
+            result._id.should.be.a('number');
+            rootUserId = result._id;
+            result.first_name.should.equal('Rory');
             response.length.should.equal(0);
             assert(eventSpy.called, 'Event did not fire.');
             assert(eventSpy.calledOnce, 'Event fired more than once');
@@ -263,9 +263,9 @@ describe("model", function(){
           trans.commit(function(err2, response){
             should.not.exist(err);
             should.not.exist(err2);
-            result.id.should.be.a('number');
-            result.id.should.equal(rootUserId);
-            result.node.first_name.should.equal(uniqueName);
+            result._id.should.be.a('number');
+            result._id.should.equal(rootUserId);
+            result.first_name.should.equal(uniqueName);
             response.length.should.equal(0);
             assert(eventSpy.called, 'Event did not fire.');
             assert(eventSpy.calledOnce, 'Event fired more than once');
@@ -286,9 +286,9 @@ describe("model", function(){
           trans.commit(function(err2, response){
             should.not.exist(err);
             should.not.exist(err2);
-            result.id.should.be.a('number');
-            result.id.should.equal(rootUserId);
-            result.node.first_name.should.equal('Mary');
+            result._id.should.be.a('number');
+            result._id.should.equal(rootUserId);
+            result.first_name.should.equal('Mary');
             response.length.should.equal(0);
             assert(eventSpy.called, 'Event did not fire.');
             assert(eventSpy.calledOnce, 'Event fired more than once');
@@ -317,8 +317,8 @@ describe("model", function(){
           trans.commit(function(err2, response){
             should.not.exist(err);
             should.not.exist(err2);
-            result.id.should.be.a('number');
-            secondId = result.id;
+            result.node._id.should.be.a('number');
+            secondId = result.node._id;
             result.node.first_name.should.equal('Rory');
             response.length.should.equal(0);
             assert(eventSpy.called, 'Event did not fire.');
@@ -345,8 +345,8 @@ describe("model", function(){
           trans.commit(function(err2, response){
             should.not.exist(err);
             should.not.exist(err2);
-            rel.id.should.be.a('number');
-            relId = rel.id;
+            rel._id.should.be.a('number');
+            relId = rel._id;
             rel.type.should.equal('FRIEND');
             rel.rel.since.should.equal('forever');
             done();
@@ -405,7 +405,7 @@ describe("model", function(){
         should.not.exist(err);
         User.create(userData, {transaction: trans}, function(err, user){
           should.not.exist(err);
-          should.exist(user.id);
+          should.exist(user._id);
           var secondUser = {
             first_name: 'Cath',
             last_name: 'Fee',
@@ -413,8 +413,8 @@ describe("model", function(){
           };
           User.create(secondUser, {transaction: trans}, function(err, user2){
             should.not.exist(err);
-            should.exist(user2.id);
-            User.createRelationship({from: user.id, to:user2.id, type: 'FRIEND'}, {transaction: trans}, function(err, rel){
+            should.exist(user2._id);
+            User.createRelationship({from: user._id, to:user2._id, type: 'FRIEND'}, {transaction: trans}, function(err, rel){
               should.not.exist(err);
               rel.type.should.equal('FRIEND');
               trans.commit(function(err){
@@ -465,65 +465,61 @@ describe("model", function(){
 
       Story = Model.model('Story', storySchema);
     });
-    it("should create a node with a sub-node", function(done){
-      var story1 = {
-        name: 'Story',
-        tags: {
-          tag: 'fiction'
-        }
-      };
-      Story.create(story1, function(err, story){
-        console.log(story);
-        should.not.exist(err);
-        done();
-      });
-    });
-    it("should create a node with an array of sub-nodes", function(done){
-      var story1 = {
-        name: 'Story',
-        tags: [{
-          tag: 'fiction'
-        },{
-          tag: 'autobiography'
-        }]
-      };
-      Story.create(story1, function(err, story){
-        console.log(story);
-        should.not.exist(err);
-        done();
-      });
-    });
-    it("should create a node with multiple sub-nodes", function(done){
-      var story1 = {
-        name: 'Story',
-        tags: {
-          tag: 'fiction'
-        },
-        publishers: {
-          brand: 'Macmillan'
-        }
-      };
-      Story.create(story1, function(err, story){
-        console.log(story);
-        should.not.exist(err);
-        done();
-      });
-    });
-    it("should create a node with multiple level sub-nodes", function(done){
-      var story1 = {
-        name: 'Story',
-        tags: {
-          tag: 'fiction',
-          subtags: {
-            genre: 'horror'
-          }
-        }
-      };
-      Story.create(story1, function(err, story){
-        console.log(story);
-        should.not.exist(err);
-        done();
-      });
-    });
+    // it("should create a node with a sub-node", function(done){
+    //   var story1 = {
+    //     name: 'Story',
+    //     tags: {
+    //       tag: 'fiction'
+    //     }
+    //   };
+    //   Story.create(story1, function(err, story){
+    //     should.not.exist(err);
+    //     done();
+    //   });
+    // });
+    // it("should create a node with an array of sub-nodes", function(done){
+    //   var story1 = {
+    //     name: 'Story',
+    //     tags: [{
+    //       tag: 'fiction'
+    //     },{
+    //       tag: 'autobiography'
+    //     }]
+    //   };
+    //   Story.create(story1, function(err, story){
+    //     should.not.exist(err);
+    //     done();
+    //   });
+    // });
+    // it("should create a node with multiple sub-nodes", function(done){
+    //   var story1 = {
+    //     name: 'Story',
+    //     tags: {
+    //       tag: 'fiction'
+    //     },
+    //     publishers: {
+    //       brand: 'Macmillan'
+    //     }
+    //   };
+    //   Story.create(story1, function(err, story){
+    //     should.not.exist(err);
+    //     done();
+    //   });
+    // });
+    // it("should create a node with multiple level sub-nodes", function(done){
+    //   var story1 = {
+    //     name: 'Story',
+    //     tags: {
+    //       tag: 'fiction',
+    //       subtags: {
+    //         genre: 'horror'
+    //       }
+    //     }
+    //   };
+    //   Story.create(story1, function(err, story){
+    //     should.not.exist(err);
+    //     done();
+    //   });
+    // });
   });
 });
