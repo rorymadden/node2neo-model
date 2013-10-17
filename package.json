@@ -21,7 +21,8 @@
   },
   "dependencies": {
     "node2neo-schema": "0.0.x",
-    "async": "0.2.9"
+    "async": "0.2.9",
+    "lodash": "2.2.x"
   },
   "devDependencies": {
     "disposable-seraph": "~0.2.7",

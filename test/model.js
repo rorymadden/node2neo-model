@@ -441,4 +441,89 @@ describe("model", function(){
       done();
     });
   });
+  describe("subschemas", function(){
+    var Story;
+    before(function(){
+      var storySchema = new Schema({
+        name: {type: 'String', required: true},
+        content: String
+      }, {label: 'Story'});
+      var tagSchema = new Schema({
+        tag: {type: String, required: true}
+      }, {label: 'Tag'});
+      var subTagSchema = new Schema({
+        genre: String
+      }, {label: 'SubTag'});
+      var publisherSchema = new Schema({
+        brnad: String
+      }, {label: 'Publisher'});
+
+      tagSchema.subSchema(subTagSchema, 'subtags', 'SUB');
+
+      storySchema.subSchema(tagSchema, 'tags', 'TAGGED');
+      storySchema.subSchema(publisherSchema, 'publishers', 'PUBLISHED');
+
+      Story = Model.model('Story', storySchema);
+    });
+    it("should create a node with a sub-node", function(done){
+      var story1 = {
+        name: 'Story',
+        tags: {
+          tag: 'fiction'
+        }
+      };
+      Story.create(story1, function(err, story){
+        console.log(story);
+        should.not.exist(err);
+        done();
+      });
+    });
+    it("should create a node with an array of sub-nodes", function(done){
+      var story1 = {
+        name: 'Story',
+        tags: [{
+          tag: 'fiction'
+        },{
+          tag: 'autobiography'
+        }]
+      };
+      Story.create(story1, function(err, story){
+        console.log(story);
+        should.not.exist(err);
+        done();
+      });
+    });
+    it("should create a node with multiple sub-nodes", function(done){
+      var story1 = {
+        name: 'Story',
+        tags: {
+          tag: 'fiction'
+        },
+        publishers: {
+          brand: 'Macmillan'
+        }
+      };
+      Story.create(story1, function(err, story){
+        console.log(story);
+        should.not.exist(err);
+        done();
+      });
+    });
+    it("should create a node with multiple level sub-nodes", function(done){
+      var story1 = {
+        name: 'Story',
+        tags: {
+          tag: 'fiction',
+          subtags: {
+            genre: 'horror'
+          }
+        }
+      };
+      Story.create(story1, function(err, story){
+        console.log(story);
+        should.not.exist(err);
+        done();
+      });
+    });
+  });
 });
