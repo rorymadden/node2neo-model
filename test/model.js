@@ -465,61 +465,71 @@ describe("model", function(){
 
       Story = Model.model('Story', storySchema);
     });
-    // it("should create a node with a sub-node", function(done){
-    //   var story1 = {
-    //     name: 'Story',
-    //     tags: {
-    //       tag: 'fiction'
-    //     }
-    //   };
-    //   Story.create(story1, function(err, story){
-    //     should.not.exist(err);
-    //     done();
-    //   });
-    // });
-    // it("should create a node with an array of sub-nodes", function(done){
-    //   var story1 = {
-    //     name: 'Story',
-    //     tags: [{
-    //       tag: 'fiction'
-    //     },{
-    //       tag: 'autobiography'
-    //     }]
-    //   };
-    //   Story.create(story1, function(err, story){
-    //     should.not.exist(err);
-    //     done();
-    //   });
-    // });
-    // it("should create a node with multiple sub-nodes", function(done){
-    //   var story1 = {
-    //     name: 'Story',
-    //     tags: {
-    //       tag: 'fiction'
-    //     },
-    //     publishers: {
-    //       brand: 'Macmillan'
-    //     }
-    //   };
-    //   Story.create(story1, function(err, story){
-    //     should.not.exist(err);
-    //     done();
-    //   });
-    // });
-    // it("should create a node with multiple level sub-nodes", function(done){
-    //   var story1 = {
-    //     name: 'Story',
-    //     tags: {
-    //       tag: 'fiction',
-    //       subtags: {
-    //         genre: 'horror'
-    //       }
-    //     }
-    //   };
-    //   Story.create(story1, function(err, story){
-    //     should.not.exist(err);
-    //     done();
-    //   });
-    // });
+    it("should create a node with a sub-node", function(done){
+      var story1 = {
+        name: 'Story',
+        tags: {
+          tag: 'fiction'
+        }
+      };
+      Story.create(story1, function(err, story){
+        should.not.exist(err);
+        done();
+      });
+    });
+    it("should create a node with an array of sub-nodes", function(done){
+      var story1 = {
+        name: 'Story',
+        tags: [{
+          tag: 'fiction'
+        },{
+          tag: 'autobiography'
+        }]
+      };
+      Story.create(story1, function(err, story){
+        should.not.exist(err);
+        done();
+      });
+    });
+    it("should create a node with multiple sub-nodes", function(done){
+      var story1 = {
+        name: 'Story',
+        tags: {
+          tag: 'fiction'
+        },
+        publishers: {
+          brand: 'Macmillan'
+        }
+      };
+      Story.create(story1, function(err, story){
+        should.not.exist(err);
+        done();
+      });
+    });
+    it("should create a node with multiple level sub-nodes", function(done){
+      var story1 = {
+        name: 'Story',
+        tags: {
+          tag: 'fiction',
+          subtags: {
+            genre: 'horror'
+          }
+        }
+      };
+      Story.create(story1, function(err, story){
+        should.not.exist(err);
+        done();
+      });
+    });
+  });
+  describe("find", function(){
+    it("should find multiple records", function(done){
+      User.find({first_name: 'Rory'}, function(err, results){
+        results.should.be.an('array');
+        results.length.should.be.above(1);
+        should.not.exist(err);
+        done();
+      });
+    });
   });
 });
