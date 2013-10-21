@@ -14,8 +14,8 @@ var User, rootUserId, secondId, relId, userData, eventSpy, uniqueName;
 describe("model", function(){
   // this.timeout(0);
 
-  before(testDatabase.refreshDb);
-  after(testDatabase.stopDb);
+  // before(testDatabase.refreshDb);
+  // after(testDatabase.stopDb);
   it("should create a new model with no schema", function(done){
 
     var Mod = Model.model('model');
@@ -33,6 +33,23 @@ describe("model", function(){
     User4.schema._constraints.should.contain('email');
     User4.schema._indexes.length.should.equal(0);
     done();
+  });
+  it("should create a model with schema methods", function(done){
+    var eventSpy = sinon.spy();
+    var schema = new Schema({
+      test: String
+    }, {label: 'Test'});
+    schema.static('activate', function(value){
+      this.schema.emit('activate', value);
+    });
+    var Test = Model.model('Test', schema);
+    Test.schema.on('activate', eventSpy);
+    Test.create({test: 'emit'}, function(err, test){
+      Test.activate('please');
+      assert(eventSpy.called, 'Event did not fire.');
+      assert(eventSpy.calledOnce, 'Event fired more than once');
+      done();
+    });
   });
   describe("model instance", function(){
     before(function(done){
@@ -119,7 +136,7 @@ describe("model", function(){
         });
       });
     });
-    it("should create a new node with a relationship", function(done){
+    it("should create a new node with a relationship: indexField _id", function(done){
       var user = {
         first_name: 'Cath',
         last_name: 'Fee',
@@ -128,6 +145,37 @@ describe("model", function(){
       var relationship = {
         indexField: '_id',
         indexValue: rootUserId,
+        nodeLabel: 'User',
+        direction: 'to',
+        type: 'ENGAGED_TO'
+      }
+      eventSpy = sinon.spy();
+      User.schema.on('create',eventSpy);
+      User.create(user, {relationship: relationship}, function(err, results){
+        should.not.exist(err);
+        should.exist(results.node);
+        should.exist(results.node._id);
+        secondId = results.node._id;
+        results.node.first_name.should.equal('Cath');
+        results.node.last_name.should.equal('fee');
+        results.node.email.should.equal('other@gmail.com');
+        should.exist(results.rel);
+        results.rel.type.should.equal('ENGAGED_TO');
+        assert(eventSpy.called, 'Event did not fire.');
+        assert(eventSpy.calledOnce, 'Event fired more than once');
+        eventSpy.alwaysCalledWithExactly(results).should.equal(true);
+        done();
+      });
+    });
+    it("should create a new node with a relationship: indexField value", function(done){
+      var user = {
+        first_name: 'Cath',
+        last_name: 'Fee',
+        email: 'other@gmail.com'
+      };
+      var relationship = {
+        indexField: 'first_name',
+        indexValue: 'Mary',
         nodeLabel: 'User',
         direction: 'to',
         type: 'ENGAGED_TO'
@@ -455,7 +503,7 @@ describe("model", function(){
         genre: String
       }, {label: 'SubTag'});
       var publisherSchema = new Schema({
-        brnad: String
+        brand: String
       }, {label: 'Publisher'});
 
       tagSchema.subSchema(subTagSchema, 'subtags', 'SUB');
@@ -529,6 +577,60 @@ describe("model", function(){
         results.length.should.be.above(1);
         should.not.exist(err);
         done();
+      });
+    });
+    it("should error with undefined find", function(done){
+      User.find({email: undefined}, function(err, results){
+        should.exist(err);
+        done();
+      });
+    });
+    describe("relationships", function(){
+      before(function(done){
+        User.find({}, {limit: 20}, function(err, results){
+          var count = results.length;
+          results.forEach(function(element){
+            var relationship = {
+              from: secondId,
+              to: element._id,
+              type: 'FRIEND',
+              direction: 'to'
+            };
+            User.createRelationship(relationship, function(err, rels){
+              should.not.exist(err);
+              results.forEach(function(element){
+                var relationship = {
+                  from: element._id,
+                  to: secondId,
+                  type: 'ENEMY',
+                  direction: 'to'
+                };
+                User.createRelationship(relationship, function(err, rels){
+                  should.not.exist(err);
+                });
+              });
+            });
+          });
+          done();
+        });
+      });
+      it("should find relationships", function(done){
+        User.getRelationships(secondId, function(err, results){
+          results.should.be.an('object').with.property('nodes');
+          results.should.be.an('object').with.property('rels');
+
+          results.rels.should.be.an('array');
+          results.nodes.should.be.an('array');
+
+          results.rels[0].should.be.an('object').with.property('_id');
+          results.rels[0].should.be.an('object').with.property('type');
+          results.rels[0].should.be.an('object').with.property('direction');
+          results.rels[0].should.be.an('object').with.property('data');
+          results.nodes[0].should.be.an('object').with.property('_id');
+          results.nodes[0].should.be.an('object').with.property('_nodeType');
+          results.nodes[0]._nodeType.should.equal('User');
+          done();
+        });
       });
     });
   });
