@@ -1,7 +1,12 @@
+## 0.0.4 (2013-10-25)
+  - Added ability to create multiple relationships on create
+  - Update with subschemas
+
+
 ## 0.0.3 (2013-10-19)
- - Updated to the latest node2neo-schema (validate now synchronous)
- - Fixed create and find bugs
- - Added getRelationships method
+  - Updated to the latest node2neo-schema (validate now synchronous)
+  - Fixed create and find bugs
+  - Added getRelationships method
 
 
 

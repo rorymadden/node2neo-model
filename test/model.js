@@ -1,5 +1,6 @@
-var testDatabase = require('./util/database');
-var db = require('node2neo').db(testDatabase.url);
+// var testDatabase = require('./util/database');
+// var db = require('node2neo').db(testDatabase.url);
+var db = require('node2neo').db('localhost:7475');
 var Model = require('../')(db);
 var Transaction = require('node2neo-transactions');
 var Schema = require('node2neo-schema');
@@ -16,6 +17,20 @@ describe("model", function(){
 
   // before(testDatabase.refreshDb);
   // after(testDatabase.stopDb);
+  before(function(done){
+    //need to drop database
+    // Drop the database.
+    var statement = {};
+    statement.statement = 'start n=node(*) match n-[r?]-() where id(n) <> 0 delete r,n';
+
+
+    db.beginTransaction({statements: [statement]}, {commit: true}, function(err){
+      statement.statement = 'DROP CONSTRAINT on (n:User) ASSERT n.email IS UNIQUE ';
+      db.beginTransaction({statements: [statement]}, {commit: true}, function(err, results){
+        done();
+      });
+    });
+  });
   it("should create a new model with no schema", function(done){
 
     var Mod = Model.model('model');
@@ -56,7 +71,7 @@ describe("model", function(){
       userData = {
         first_name: '  Rory   ',
         last_name: '  Madden  ',
-        email: 'rorymadden@gmail.com'
+        email: 'modeltest@gmail.com'
       };
 
       var emailRegEx = /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/;
@@ -72,7 +87,7 @@ describe("model", function(){
       var user = {
         first_name: 'Rory',
         last_name: 'Madden',
-        email: 'rorymadden@gmail.com'
+        email: 'modeltest@gmail.com'
       };
       eventSpy = sinon.spy();
       User.schema.on('create', eventSpy);
@@ -83,7 +98,7 @@ describe("model", function(){
         should.exist(results);
         results.first_name.should.equal('Rory');
         results.last_name.should.equal('madden');
-        results.email.should.equal('rorymadden@gmail.com');
+        results.email.should.equal('modeltest@gmail.com');
         should.not.exist(results.rel);
         assert(eventSpy.called, 'Event did not fire.');
         assert(eventSpy.calledOnce, 'Event fired more than once');
@@ -103,7 +118,7 @@ describe("model", function(){
         should.exist(results);
         results.first_name.should.equal('Roger');
         results.last_name.should.equal('madden');
-        results.email.should.equal('rorymadden@gmail.com');
+        results.email.should.equal('modeltest@gmail.com');
         should.not.exist(results.rel);
         assert(eventSpy.called, 'Event did not fire.');
         assert(eventSpy.calledOnce, 'Event fired more than once');
@@ -127,7 +142,7 @@ describe("model", function(){
           should.exist(results);
           results.first_name.should.equal('Mary');
           results.last_name.should.equal('madden');
-          results.email.should.equal('rorymadden@gmail.com');
+          results.email.should.equal('modeltest@gmail.com');
           should.not.exist(results.rel);
           assert(eventSpy.called, 'Event did not fire.');
           assert(eventSpy.calledTwice, 'Event should have fired twice');
@@ -153,14 +168,13 @@ describe("model", function(){
       User.schema.on('create',eventSpy);
       User.create(user, {relationship: relationship}, function(err, results){
         should.not.exist(err);
-        should.exist(results.node);
-        should.exist(results.node._id);
-        secondId = results.node._id;
-        results.node.first_name.should.equal('Cath');
-        results.node.last_name.should.equal('fee');
-        results.node.email.should.equal('other@gmail.com');
-        should.exist(results.rel);
-        results.rel.type.should.equal('ENGAGED_TO');
+        should.exist(results._id);
+        secondId = results._id;
+        results.first_name.should.equal('Cath');
+        results.last_name.should.equal('fee');
+        results.email.should.equal('other@gmail.com');
+        // should.exist(results.rel);
+        // results.rel.type.should.equal('ENGAGED_TO');
         assert(eventSpy.called, 'Event did not fire.');
         assert(eventSpy.calledOnce, 'Event fired more than once');
         eventSpy.alwaysCalledWithExactly(results).should.equal(true);
@@ -171,7 +185,7 @@ describe("model", function(){
       var user = {
         first_name: 'Cath',
         last_name: 'Fee',
-        email: 'other@gmail.com'
+        email: 'other2@gmail.com'
       };
       var relationship = {
         indexField: 'first_name',
@@ -184,18 +198,58 @@ describe("model", function(){
       User.schema.on('create',eventSpy);
       User.create(user, {relationship: relationship}, function(err, results){
         should.not.exist(err);
-        should.exist(results.node);
-        should.exist(results.node._id);
-        secondId = results.node._id;
-        results.node.first_name.should.equal('Cath');
-        results.node.last_name.should.equal('fee');
-        results.node.email.should.equal('other@gmail.com');
-        should.exist(results.rel);
-        results.rel.type.should.equal('ENGAGED_TO');
+        should.exist(results._id);
+        secondId = results._id;
+        results.first_name.should.equal('Cath');
+        results.last_name.should.equal('fee');
+        results.email.should.equal('other2@gmail.com');
+        // should.exist(results.rel);
+        // results.rel.type.should.equal('ENGAGED_TO');
         assert(eventSpy.called, 'Event did not fire.');
         assert(eventSpy.calledOnce, 'Event fired more than once');
         eventSpy.alwaysCalledWithExactly(results).should.equal(true);
+
         done();
+      });
+    });
+    it('should create multiple relationships', function(done){
+      var user = {
+        first_name: 'Cath',
+        last_name: 'Fee',
+        email: 'other3@gmail.com'
+      };
+      var relationship = [{
+        indexField: 'first_name',
+        indexValue: 'Mary',
+        nodeLabel: 'User',
+        direction: 'to',
+        type: 'LOVES'
+      }, {
+        indexField: '_id',
+        indexValue: rootUserId,
+        nodeLabel: 'User',
+        direction: 'to',
+        type: 'MARRIED'
+      }];
+      eventSpy = sinon.spy();
+      User.schema.on('create',eventSpy);
+      User.create(user, {relationship: relationship}, function(err, results){
+        should.not.exist(err);
+        should.exist(results._id);
+        secondId = results._id;
+        results.first_name.should.equal('Cath');
+        results.last_name.should.equal('fee');
+        results.email.should.equal('other3@gmail.com');
+        // should.exist(results.rel);
+        // results.rel.type.should.equal('ENGAGED_TO');
+        assert(eventSpy.called, 'Event did not fire.');
+        assert(eventSpy.calledOnce, 'Event fired more than once');
+        eventSpy.alwaysCalledWithExactly(results).should.equal(true);
+        User.getRelationships(results._id, function(err, results){
+          should.not.exist(err);
+          results.nodes.length.should.equal(2);
+          done();
+        });
       });
     });
     it("should create a new relationship", function(done){
@@ -225,9 +279,10 @@ describe("model", function(){
     it("should remove a node", function(done){
       eventSpy = sinon.spy();
       User.schema.on('remove',eventSpy);
-      User.remove(rootUserId, function(err){
+      User.remove(secondId, function(err){
         // has relationships
         should.exist(err);
+        err.message.should.contain('Failed to delete node due to relationships. Try again with force: true option.');
         User.remove(rootUserId, {force: true}, function(err){
           should.not.exist(err);
           User.findById(rootUserId, function(err, node){
@@ -251,7 +306,7 @@ describe("model", function(){
     //   var user = {
     //     first_name: 'Rory',
     //     last_name: 'Madden',
-    //     email: 'rorymadden@gmail.com'
+    //     email: 'modeltest@gmail.com'
     //   };
     //   User.create(user, function(err, results){
     //     should.not.exist(err);
@@ -264,7 +319,7 @@ describe("model", function(){
       userData = {
         first_name: '  Rory   ',
         last_name: '  Madden  ',
-        email: 'rorymadden@gmail.com'
+        email: 'modeltest@gmail.com'
       };
 
       var emailRegEx = /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/;
@@ -357,6 +412,7 @@ describe("model", function(){
         direction: 'to',
         type: 'ENGAGED_TO'
       };
+      userData.email = 'finaltype@gmail.com';
 
       var trans = new Transaction(db);
       trans.begin(function(err){
@@ -365,9 +421,9 @@ describe("model", function(){
           trans.commit(function(err2, response){
             should.not.exist(err);
             should.not.exist(err2);
-            result.node._id.should.be.a('number');
-            secondId = result.node._id;
-            result.node.first_name.should.equal('Rory');
+            result._id.should.be.a('number');
+            secondId = result._id;
+            result.first_name.should.equal('Rory');
             response.length.should.equal(0);
             assert(eventSpy.called, 'Event did not fire.');
             assert(eventSpy.calledOnce, 'Event fired more than once');
@@ -449,6 +505,7 @@ describe("model", function(){
     });
     it("should perform multiple operations in a single transaction", function(done){
       var trans = new Transaction(db);
+      userData.email = 'multiple@gmail.com';
       trans.begin(function(err){
         should.not.exist(err);
         User.create(userData, {transaction: trans}, function(err, user){
@@ -490,7 +547,7 @@ describe("model", function(){
     });
   });
   describe("subschemas", function(){
-    var Story;
+    var Story, storyId, tagId;
     before(function(){
       var storySchema = new Schema({
         name: {type: 'String', required: true},
@@ -522,7 +579,14 @@ describe("model", function(){
       };
       Story.create(story1, function(err, story){
         should.not.exist(err);
-        done();
+        storyId = story._id;
+
+        Story.getRelationships(storyId, function(err, results){
+          should.not.exist(err);
+          should.exist(results.nodes[0]._id);
+          tagId = results.nodes[0]._id;
+          done();
+        });
       });
     });
     it("should create a node with an array of sub-nodes", function(done){
@@ -565,6 +629,19 @@ describe("model", function(){
         }
       };
       Story.create(story1, function(err, story){
+        should.not.exist(err);
+        done();
+      });
+    });
+    it('should update a node with subschemas', function(done){
+      var updates = {
+        name: 'Blue',
+        tags: {
+          _id: tagId,
+          tag: 'green'
+        }
+      };
+      Story.findByIdAndUpdate(storyId, updates, function(err, story){
         should.not.exist(err);
         done();
       });
