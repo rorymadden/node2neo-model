@@ -1,6 +1,6 @@
 // var testDatabase = require('./util/database');
 // var db = require('node2neo').db(testDatabase.url);
-var db = require('node2neo').db('localhost:7475');
+var db = require('node2neo')('localhost:7475');
 var Model = require('../')(db);
 var Transaction = require('node2neo-transactions');
 var Schema = require('node2neo-schema');
@@ -21,7 +21,7 @@ describe("model", function(){
     //need to drop database
     // Drop the database.
     var statement = {};
-    statement.statement = 'start n=node(*) match n-[r?]-() where id(n) <> 0 delete r,n';
+    statement.statement = 'start n=node(*) optional match n-[r]-() delete r,n';
 
 
     db.beginTransaction({statements: [statement]}, {commit: true}, function(err){
@@ -636,14 +636,69 @@ describe("model", function(){
     it('should update a node with subschemas', function(done){
       var updates = {
         name: 'Blue',
-        tags: {
-          _id: tagId,
-          tag: 'green'
-        }
+        // tags: {
+        //   tag: 'green'
+        // }
       };
       Story.findByIdAndUpdate(storyId, updates, function(err, story){
+        console.log(err);
         should.not.exist(err);
         done();
+      });
+    });
+    it('should create a node with unique sub_nodes', function (done) {
+      var topSchema = new Schema({
+        top: String
+      }, {label: 'Top'});
+      var secondSchema = new Schema({
+        second: String
+      }, {label: 'Second'});
+      var thirdSchema = new Schema({
+        third: String
+      }, {label: 'Third', unique: true});
+      var second2Schema = new Schema({
+        second2: String
+      }, {label: 'Second2'});
+      secondSchema.subSchema(thirdSchema, 'third', 'THIRD');
+      topSchema.subSchema(secondSchema, 'second', 'SECOND');
+      topSchema.subSchema(second2Schema, 'second2', 'SECOND2');
+
+      var Top = Model.model('Top', topSchema);
+
+      var data = {
+        top: 'TopTest',
+        second: {
+          second: 'secondTest',
+          third: {
+            third: 'Unique'
+          }
+        },
+        second2: {
+          second2: 'second2Test'
+        }
+      };
+
+      Top.create(data, function(err, top){
+        should.not.exist(err);
+        // create a duplicate node and validate unique works
+        Top.create(data, function(err, top){
+          console.log(top, err);
+          should.not.exist(err);
+          done();
+        })
+
+
+        // var statement = {
+        //   statement: 'START top=node({id}) MATCH top-->(second:Second)-->(third:Third) RETURN top, second, third',
+        //   parameters: {
+        //     id: top._id
+        //   }
+        // };
+        // db.beginTransaction({statements: [statement]}, {commit: true}, function(err, results){
+        //   should.not.exist(err);
+        //   results.results[0].data[0].row.length.should.equal(3);
+        //   done();
+        // });
       });
     });
   });

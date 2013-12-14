@@ -1,7 +1,7 @@
 {
   "name": "node2neo-model",
   "description": "Model support for Node2neo",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": {
     "name": "Rory Madden",
     "email": "rorymadden@gmail.com"
@@ -28,9 +28,9 @@
     "disposable-seraph": "~0.2.7",
     "mocha": "~1.3.0",
     "chai": "~1.8.0",
-    "node2neo": "0.0.x",
+    "node2neo": "~0.0.4",
     "node2neo-transactions": "0.0.x",
-    "node2neo-schema": "0.0.x",
+    "node2neo-schema": "0.0.7",
     "sinon": "1.7.3"
   },
   "engines": {
