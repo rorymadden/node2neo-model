@@ -35,6 +35,7 @@ Often when creating a model you want to create a relationship to another object.
 var relationship = {
   indexField: 'email',
   indexValue: 'test@test.com',
+  nodeLabel: 'User', // this is optional, but can narrow down your matched results
   type: 'FRIEND',
   direction: 'to',
   data: {

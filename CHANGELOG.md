@@ -1,5 +1,5 @@
 ## 0.0.8 (2014-03-21)
- - Removed nodeLabel from relationship creation
+ - Made nodeLabel optional on relationship creation
  - Updated in > to and out -> from (getRelationships), in line with documentation
 
  ## 0.0.7 (2014-03-21)
