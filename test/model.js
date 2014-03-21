@@ -1,6 +1,6 @@
-// var testDatabase = require('./util/database');
-// var db = require('node2neo').db(testDatabase.url);
-var db = require('node2neo')('localhost:7475');
+var testDatabase = require('./util/database');
+var db = require('node2neo')(testDatabase.url);
+// var db = require('node2neo')('localhost:7475');
 var Model = require('../')(db);
 var Transaction = require('node2neo-transactions');
 var Schema = require('node2neo-schema');
@@ -15,8 +15,8 @@ var User, rootUserId, secondId, relId, userData, eventSpy, uniqueName;
 describe("model", function(){
   // this.timeout(0);
 
-  // before(testDatabase.refreshDb);
-  // after(testDatabase.stopDb);
+  before(testDatabase.refreshDb);
+  after(testDatabase.stopDb);
   before(function(done){
     //need to drop database
     // Drop the database.
@@ -287,7 +287,7 @@ describe("model", function(){
           should.not.exist(err);
           User.findById(rootUserId, function(err, node){
             should.exist(err);
-            err[0].code.should.equal(42000);
+            err[0].code.should.equal('Neo.ClientError.Statement.EntityNotFound');
             err[0].message.should.contain('Node with id');
             should.not.exist(node);
             assert(eventSpy.called, 'Event did not fire.');
