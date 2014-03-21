@@ -1,4 +1,8 @@
-## 0.0.7 (2014-03-21)
+## 0.0.8 (2014-03-21)
+ - Removed nodeLabel from relationship creation
+ - Updated in > to and out -> from (getRelationships), in line with documentation
+
+ ## 0.0.7 (2014-03-21)
  - Fixed node = 0 errors
 
 ## 0.0.4 (2013-10-25)
