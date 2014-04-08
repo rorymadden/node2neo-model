@@ -1,3 +1,7 @@
+##0.0.9 (2014-04-08)
+ - Disposable Seraph causing problems on installation
+ - Removed JSONStream module
+
 ## 0.0.8 (2014-03-21)
  - Made nodeLabel optional on relationship creation
  - Updated in > to and out -> from (getRelationships), in line with documentation
