@@ -1,4 +1,7 @@
-##0.0.10 (2014-04-14)
+##0.0.11 (2014-04-14)
+ - Fixed getRelationships with transaction
+
+ ##0.0.10 (2014-04-14)
  - Removed node2neo-transaction dependency
 
 ##0.0.9 (2014-04-08)

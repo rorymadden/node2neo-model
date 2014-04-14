@@ -1,7 +1,7 @@
 {
   "name": "node2neo-model",
   "description": "Model support for Node2neo",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "author": {
     "name": "Rory Madden",
     "email": "rorymadden@gmail.com"
