@@ -78,26 +78,26 @@ There are issues with the database locking if two transactions attempt to update
 NOTE: You cannot create and update a model in the same transaction as the node does not exist in the database until the complete transaction has been committed.
 
 ```js
-var Transaction = new Transaction(db);
 
-var trans1 = new Transaction;
-trans1.begin(function(err){
-  User.create(data, {transaction: trans1}, function(err, user){
-    Event.create(data, {transaction: trans1}, function(err, event){
-      Other.update(model, updates, {transaction: trans1}, function(err, other){
-        trans1.commit(function(err){
+db.beginTransaction (function (err, results) {
+  if (err) //handle Error
+  var transId = db.getTransactionId(results.commit);
+  User.create(data, {transaction: transId}, function(err, user){
+    Event.create(data, {transaction: transId}, function(err, event){
+      Other.update(model, updates, {transaction: transId}, function(err, other){
+        db.commitTransaction(transId, function (err) {
           // all or nothing commit
         })
-      });
-    });
-  });
-});
+      })
+    })
+  })
+})
 ```
 
 #### Remove a node
 To remove a node simply pass its id to the remove function. The options object can contain a force option. Removing a node in Neo4j will fail if it has any relationships. The force option deletes the node and all relationships that the node has.
 
-When removing nodes be carefult not to leave orphan nodes - remove does not cascade.
+When removing nodes be careful not to leave orphan nodes - remove does not cascade.
 
 ```js
 User.remove(id, {force: true}, function(err){

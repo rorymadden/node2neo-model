@@ -1,3 +1,6 @@
+##0.0.10 (2014-04-14)
+ - Removed node2neo-transaction dependency
+
 ##0.0.9 (2014-04-08)
  - Disposable Seraph causing problems on installation
  - Removed JSONStream module
